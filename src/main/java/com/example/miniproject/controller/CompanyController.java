@@ -21,12 +21,12 @@ public class CompanyController {
     }
 
     @PostMapping("/team")
-    public void enrollTeam(@RequestBody TeamCreateRequest request){
+    public void enrollTeam(@RequestBody TeamCreateRequest request) {
         companyService.enrollTeam(request);
     }
 
     @PostMapping("/employee")
-    public void enrollEmployee(@RequestBody EmployeeCreateRequest request){
+    public void enrollEmployee(@RequestBody EmployeeCreateRequest request) {
         companyService.enrollEmployee(request);
     }
 

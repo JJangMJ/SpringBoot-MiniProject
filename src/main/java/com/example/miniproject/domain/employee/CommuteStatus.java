@@ -1,7 +1,5 @@
 package com.example.miniproject.domain.employee;
 
-import com.example.miniproject.dto.request.employee.EmployeeGoRequest;
-import com.example.miniproject.dto.request.employee.EmployeeLeaveRequest;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,10 +20,6 @@ public class CommuteStatus {
     private long workingMinutes;
     private boolean status = false;
 
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
     public CommuteStatus() {
 
     }
@@ -37,33 +31,20 @@ public class CommuteStatus {
         this.status = status;
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public LocalTime getStartTime() {
         return startTime;
     }
 
-    public LocalTime getEndTime() {
-        return endTime;
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
     }
 
-    public long getWorkingMinutes() {
-        return workingMinutes;
-    }
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public Long getEmployeeId() {
-        return employeeId;
-    }
 
     public void changeStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
+
     public void changeStatus(boolean status) {
         this.status = status;
     }

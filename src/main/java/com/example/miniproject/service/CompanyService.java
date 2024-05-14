@@ -4,8 +4,8 @@ import com.example.miniproject.domain.employee.CommuteStatus;
 import com.example.miniproject.domain.employee.CommuteStatusRepository;
 import com.example.miniproject.domain.employee.Employee;
 import com.example.miniproject.domain.employee.EmployeeRepository;
-import com.example.miniproject.domain.team.TeamRepository;
 import com.example.miniproject.domain.team.Team;
+import com.example.miniproject.domain.team.TeamRepository;
 import com.example.miniproject.dto.request.employee.EmployeeCreateRequest;
 import com.example.miniproject.dto.request.employee.EmployeeGoRequest;
 import com.example.miniproject.dto.request.employee.EmployeeLeaveRequest;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CompanyService {
@@ -62,7 +61,7 @@ public class CompanyService {
         if (employeeRepository.existsById(request.getEmployeeId()) == true && commuteStatusRepository.existsByEmployeeId(request.getEmployeeId()) == false) {
             CommuteStatus commuteStatus = new CommuteStatus(request.getEmployeeId(), request.getStartTime(), request.getEndTime(), true);
             commuteStatusRepository.save(commuteStatus);
-        } else if (employeeRepository.existsById(request.getEmployeeId()) == true && commuteStatusRepository.existsByEmployeeId(request.getEmployeeId()) == true){
+        } else if (employeeRepository.existsById(request.getEmployeeId()) == true && commuteStatusRepository.existsByEmployeeId(request.getEmployeeId()) == true) {
             CommuteStatus commuteStatus = commuteStatusRepository.findById(request.getEmployeeId()).orElse(null);
             if (commuteStatus != null) {
                 commuteStatus.changeStartTime(request.getStartTime());
@@ -82,7 +81,7 @@ public class CompanyService {
             if (commuteStatus != null) {
                 commuteStatus.setEndTime(request.getEndTime());
                 commuteStatus.changeStatus(false);
-                commuteStatus.changeWorkingMinutes(Duration.between(commuteStatus.getStartTime(),request.getEndTime()).toMinutes());
+                commuteStatus.changeWorkingMinutes(Duration.between(commuteStatus.getStartTime(), request.getEndTime()).toMinutes());
                 commuteStatusRepository.save(commuteStatus);
             }
         } else {

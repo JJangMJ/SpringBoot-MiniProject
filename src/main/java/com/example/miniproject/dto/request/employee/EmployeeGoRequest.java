@@ -1,14 +1,15 @@
 package com.example.miniproject.dto.request.employee;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class EmployeeGoRequest {
 
     private Long employeeId;
-    private LocalTime startTime = LocalTime.now();
-    private LocalTime endTime = null;
+    private LocalDateTime startTime = LocalDateTime.now();
+    private LocalDateTime endTime = null;
 
-    public LocalTime getEndTime() {
+    public LocalDateTime getEndTime() {
         return endTime;
     }
 
@@ -16,7 +17,7 @@ public class EmployeeGoRequest {
         return employeeId;
     }
 
-    public LocalTime getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 }

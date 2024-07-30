@@ -1,42 +1,45 @@
 package com.example.miniproject.service;
 
-import com.example.miniproject.domain.employee.CommuteStatus;
-import com.example.miniproject.domain.employee.CommuteStatusRepository;
-import com.example.miniproject.domain.employee.Employee;
-import com.example.miniproject.domain.employee.EmployeeRepository;
+import com.example.miniproject.domain.employee.*;
 import com.example.miniproject.domain.team.Team;
 import com.example.miniproject.domain.team.TeamRepository;
 import com.example.miniproject.dto.request.employee.EmployeeCreateRequest;
+import com.example.miniproject.dto.request.employee.EmployeeGetRequest;
 import com.example.miniproject.dto.request.employee.EmployeeGoRequest;
 import com.example.miniproject.dto.request.employee.EmployeeLeaveRequest;
-import com.example.miniproject.dto.request.team.TeamCreateRequest;
+import com.example.miniproject.dto.response.employee.EmployeeMonthStatusResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CompanyService {
+@Slf4j
+public class EmployeeService {
 
     TeamRepository teamRepository;
     EmployeeRepository employeeRepository;
     CommuteStatusRepository commuteStatusRepository;
+    MonthStatusRepository monthStatusRepository;
+    List<MonthStatus> todayWorkTimeList = new ArrayList<>();
 
-    public CompanyService(TeamRepository teamRepository, EmployeeRepository employeeRepository, CommuteStatusRepository commuteStatusRepository) {
+    public EmployeeService(TeamRepository teamRepository,
+                           EmployeeRepository employeeRepository,
+                           CommuteStatusRepository commuteStatusRepository,
+                           MonthStatusRepository monthStatusRepository) {
         this.teamRepository = teamRepository;
         this.employeeRepository = employeeRepository;
         this.commuteStatusRepository = commuteStatusRepository;
-    }
-
-    public void enrollTeam(TeamCreateRequest request) {
-        Team team = new Team(request.getName(), request.getManager(), request.getMemberCount());
-        teamRepository.save(team);
+        this.monthStatusRepository = monthStatusRepository;
     }
 
     public void enrollEmployee(EmployeeCreateRequest request) {
 
-        if (teamRepository.existsByName(request.getTeamName()) == false) {
+        if (!teamRepository.existsByName(request.getTeamName())) {
             throw new IllegalArgumentException("그런 팀은 없습니다.");
+
         } else {
             Employee employee = new Employee(request.getName(), request.getTeamName(), request.getRole(), request.getBirthday(), request.getWorkStartDate());
 
@@ -47,8 +50,10 @@ public class CompanyService {
                 team.updateMemberCount();
                 teamRepository.save(team);
                 employeeRepository.save(employee);
+
             } else if (employee.getRole().equals("MANAGER") && teamRepository.findByName(request.getTeamName()).getManager().equals("MANAGER")) {
                 throw new IllegalArgumentException("이미 MANAGER가 있습니다.");
+
             } else if (employee.getRole().equals("MEMBER")) {
                 team.updateMemberCount();
                 teamRepository.save(team);
@@ -57,51 +62,66 @@ public class CompanyService {
         }
     }
 
-    public void goToWork(EmployeeGoRequest request) {
-        if (employeeRepository.existsById(request.getEmployeeId()) == true && commuteStatusRepository.existsByEmployeeId(request.getEmployeeId()) == false) {
+    public void goWork(EmployeeGoRequest request) {
+
+        if (employeeRepository.existsById(request.getEmployeeId()) && !commuteStatusRepository.existsByEmployeeId(request.getEmployeeId())) {
             CommuteStatus commuteStatus = new CommuteStatus(request.getEmployeeId(), request.getStartTime(), request.getEndTime(), true);
             commuteStatusRepository.save(commuteStatus);
-        } else if (employeeRepository.existsById(request.getEmployeeId()) == true && commuteStatusRepository.existsByEmployeeId(request.getEmployeeId()) == true) {
+
+        } else if (employeeRepository.existsById(request.getEmployeeId()) && commuteStatusRepository.existsByEmployeeId(request.getEmployeeId())) {
+
             CommuteStatus commuteStatus = commuteStatusRepository.findById(request.getEmployeeId()).orElse(null);
-            if (commuteStatus != null) {
+
+            if (commuteStatus != null && !commuteStatus.getStatus()) {
                 commuteStatus.changeStartTime(request.getStartTime());
                 commuteStatus.changeStatus(true);
                 commuteStatus.setEndTime(null);
                 commuteStatusRepository.save(commuteStatus);
+                //throw new IllegalArgumentException("오늘은 이미 퇴근했습니다. 내일 출근해주세요.");
+            } else {
+                throw new IllegalArgumentException("이미 출근했습니다.");
             }
         } else {
-            throw new IllegalArgumentException("이런 아이디를 가진 직원은 없습니다. 등록을 먼저 해주세요.");
+            throw new IllegalArgumentException("없는 직원입니다.");
         }
     }
 
-    public void getOffWork(EmployeeLeaveRequest request) {
+    public void leaveWork(EmployeeLeaveRequest request) {
 
-        if (commuteStatusRepository.existsByEmployeeId(request.getEmployeeId()) == true) {
+        if (commuteStatusRepository.existsByEmployeeId(request.getEmployeeId())) {
+
             CommuteStatus commuteStatus = commuteStatusRepository.findByEmployeeId(request.getEmployeeId());
-            if (commuteStatus != null) {
+//            MonthStatus monthStatus = monthStatusRepository.
+
+            if (commuteStatus != null && commuteStatus.getStatus()) {
+
+                long todayWorkTime = Duration.between(commuteStatus.getStartTime(), request.getEndTime()).toMinutes();
+
                 commuteStatus.setEndTime(request.getEndTime());
                 commuteStatus.changeStatus(false);
-                commuteStatus.changeWorkingMinutes(Duration.between(commuteStatus.getStartTime(), request.getEndTime()).toMinutes());
                 commuteStatusRepository.save(commuteStatus);
+
+//                todayWorkTimeList.;
+            } else {
+                throw new IllegalArgumentException("출근하지 않은 직원입니다.");
             }
         } else {
-            throw new IllegalArgumentException("출근하지 않은 직원입니다.");
+            if (employeeRepository.existsById(request.getEmployeeId())) {
+                throw new IllegalArgumentException("출근하지 않은 직원입니다.");
+
+            } else {
+                throw new IllegalArgumentException("없는 직원입니다.");
+            }
         }
 
     }
 
-    public List<Team> findAllTeam() {
-        List<Team> teams = teamRepository.findAll();
-        return teams;
-    }
-    // 위의 방법도 괜찮지만 만약 List<TeamReadResponse> 형이었으면
-    // return users.stream()
-    //             .map(user -> new UserResponse(user.getId(), user.getName(), user.getAge()))
-    //             .collect(Collectors.toList());
-    // 이렇게 반환했어야 함. 사실 이게 이상적임.
-
     public List<Employee> findAllEmployee() {
-        List<Employee> employees = employeeRepository.findAll();
-        return employees;
+        return employeeRepository.findAll();
+    }
+
+    public EmployeeMonthStatusResponse getMonthStatus(EmployeeGetRequest request) {
+        //TODO : 파라미터 넣어주기
+        EmployeeMonthStatusResponse response = new EmployeeMonthStatusResponse();
     }
 }

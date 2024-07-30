@@ -1,14 +1,15 @@
 package com.example.miniproject.dto.request.employee;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class EmployeeCreateRequest {
 
     private String name;
     private String teamName;
     private String role;
-    private LocalDate birthday;
-    private LocalDate workStartDate;
+    private LocalDateTime birthday;
+    private LocalDateTime workStartDate;
 
     public String getName() {
         return name;
@@ -22,11 +23,11 @@ public class EmployeeCreateRequest {
         return role;
     }
 
-    public LocalDate getBirthday() {
+    public LocalDateTime getBirthday() {
         return birthday;
     }
 
-    public LocalDate getWorkStartDate() {
+    public LocalDateTime getWorkStartDate() {
         return workStartDate;
     }
 }

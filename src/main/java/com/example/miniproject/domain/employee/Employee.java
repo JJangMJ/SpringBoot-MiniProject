@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class Employee {
@@ -17,13 +18,13 @@ public class Employee {
     private String name;
     private String teamName;
     private String role;
-    private LocalDate birthday;
-    private LocalDate workStartDate;
+    private LocalDateTime birthday;
+    private LocalDateTime workStartDate;
 
     public Employee() {
     }
 
-    public Employee(String name, String teamName, String role, LocalDate birthday, LocalDate workStartDate) {
+    public Employee(String name, String teamName, String role, LocalDateTime birthday, LocalDateTime workStartDate) {
         this.name = name;
         this.teamName = teamName;
         this.role = role;
@@ -39,11 +40,11 @@ public class Employee {
         return teamName;
     }
 
-    public LocalDate getBirthday() {
+    public LocalDateTime getBirthday() {
         return birthday;
     }
 
-    public LocalDate getWorkStartDate() {
+    public LocalDateTime getWorkStartDate() {
         return workStartDate;
     }
 
